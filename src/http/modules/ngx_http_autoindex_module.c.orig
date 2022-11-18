@@ -42,7 +42,6 @@ typedef struct {
     ngx_uint_t     format;
     ngx_flag_t     localtime;
     ngx_flag_t     exact_size;
-    ngx_flag_t     show_dot_files;
 } ngx_http_autoindex_loc_conf_t;
 
 
@@ -113,13 +112,6 @@ static ngx_command_t  ngx_http_autoindex_commands[] = {
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_autoindex_loc_conf_t, exact_size),
-      NULL },
-
-    { ngx_string("autoindex_show_dot_files"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_autoindex_loc_conf_t, show_dot_files),
       NULL },
 
       ngx_null_command
@@ -322,11 +314,9 @@ ngx_http_autoindex_handler(ngx_http_request_t *r)
 
         len = ngx_de_namelen(&dir);
 
-	if (!alcf->show_dot_files) {
-        	if (ngx_de_name(&dir)[0] == '.') {
-            		continue;
-        	}
-	}
+        if (ngx_de_name(&dir)[0] == '.') {
+            continue;
+        }
 
         if (!dir.valid_info) {
 
@@ -548,16 +538,10 @@ ngx_http_autoindex_html(ngx_http_request_t *r, ngx_array_t *entries)
 
     b->last = ngx_cpymem(b->last, "</h1>", sizeof("</h1>") - 1);
 
+    b->last = ngx_cpymem(b->last, "<hr><pre><a href=\"../\">../</a>" CRLF,
+                         sizeof("<hr><pre><a href=\"../\">../</a>" CRLF) - 1);
+
     alcf = ngx_http_get_module_loc_conf(r, ngx_http_autoindex_module);
-
-    if (!alcf->show_dot_files) {
-        b->last = ngx_cpymem(b->last, "<hr><pre><a href=\"../\">../</a>" CRLF,
-                             sizeof("<hr><pre><a href=\"../\">../</a>" CRLF) - 1);
-    } else {
-        b->last = ngx_cpymem(b->last, "<hr><pre>" CRLF,
-                             sizeof("<hr><pre>" CRLF) - 1);
-    }
-
     tp = ngx_timeofday();
 
     for (i = 0; i < entries->nelts; i++) {
@@ -1048,7 +1032,6 @@ ngx_http_autoindex_create_loc_conf(ngx_conf_t *cf)
     conf->format = NGX_CONF_UNSET_UINT;
     conf->localtime = NGX_CONF_UNSET;
     conf->exact_size = NGX_CONF_UNSET;
-    conf->show_dot_files = NGX_CONF_UNSET;
 
     return conf;
 }
@@ -1065,7 +1048,6 @@ ngx_http_autoindex_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               NGX_HTTP_AUTOINDEX_HTML);
     ngx_conf_merge_value(conf->localtime, prev->localtime, 0);
     ngx_conf_merge_value(conf->exact_size, prev->exact_size, 1);
-    ngx_conf_merge_value(conf->show_dot_files, prev->show_dot_files, 0);
 
     return NGX_CONF_OK;
 }
