@@ -5,7 +5,8 @@ all modification under branches/stable-1.22
 ## added patch to show dot file
 
 [ref ticket](https://trac.nginx.org/nginx/ticket/557)
-[file url ngx_autoindex_show_dot_files.patch](https://trac.nginx.org/nginx/raw-attachment/ticket/557/ngx_autoindex_show_dot_files.patch)
+
+[file url: ngx_autoindex_show_dot_files.patch](https://trac.nginx.org/nginx/raw-attachment/ticket/557/ngx_autoindex_show_dot_files.patch)
 
 related file:
 
